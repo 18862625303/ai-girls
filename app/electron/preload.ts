@@ -7,31 +7,15 @@ type SpeechToTextInput = {
   language?: string
 }
 
-contextBridge.exposeInMainWorld('ipcRenderer', {
-  on(...args: Parameters<typeof ipcRenderer.on>) {
-    const [channel, listener] = args
-    return ipcRenderer.on(channel, (event, ...rest) => listener(event, ...rest))
-  },
-  off(...args: Parameters<typeof ipcRenderer.off>) {
-    const [channel, ...rest] = args
-    return ipcRenderer.off(channel, ...rest)
-  },
-  send(...args: Parameters<typeof ipcRenderer.send>) {
-    const [channel, ...rest] = args
-    return ipcRenderer.send(channel, ...rest)
-  },
-  invoke(...args: Parameters<typeof ipcRenderer.invoke>) {
-    const [channel, ...rest] = args
-    return ipcRenderer.invoke(channel, ...rest)
-  },
-})
-
 contextBridge.exposeInMainWorld('appAPI', {
   openFiles: () => ipcRenderer.invoke('app:open-files') as Promise<string[]>,
   readFileAsBase64: (filePath: string) => ipcRenderer.invoke('app:read-file', filePath) as Promise<string>,
   readDocxAsHtml: (filePath: string) => ipcRenderer.invoke('app:read-docx-html', filePath) as Promise<string>,
   askAI: (message: string) => ipcRenderer.invoke('app:ask-ai', message) as Promise<{ ok: boolean; reply: string }>,
+  askAIWithFiles: (message: string, filePaths: string[]) =>
+    ipcRenderer.invoke('app:ask-ai-with-files', message, filePaths) as Promise<{ ok: boolean; reply: string }>,
   askAIStream: (message: string) => ipcRenderer.send('app:ask-ai-stream', message),
+  askAIStreamWithFiles: (message: string, filePaths: string[]) => ipcRenderer.send('app:ask-ai-stream-with-files', message, filePaths),
   stopAIStream: () => ipcRenderer.send('app:stop-ai-stream'),
   speechToText: (payload: SpeechToTextInput) =>
     ipcRenderer.invoke('app:speech-to-text', payload) as Promise<{ ok: boolean; text: string; error?: string }>,

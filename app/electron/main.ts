@@ -3,8 +3,12 @@ import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import fs from 'node:fs/promises'
 import mammoth from 'mammoth'
+import { config } from 'dotenv'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
+// Load environment variables from .env file
+config({ path: path.join(__dirname, '..', '.env') })
 
 process.env.APP_ROOT = path.join(__dirname, '..')
 
@@ -16,7 +20,7 @@ process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL ? path.join(process.env.APP_ROOT, 
 let win: BrowserWindow | null
 let activeChatController: AbortController | null = null
 
-const DEFAULT_CHAT_MODEL = process.env.ARK_CHAT_MODEL || process.env.ARK_MODEL || 'doubao-1-5-lite-32k-250115'
+const DEFAULT_CHAT_MODEL = process.env.ARK_CHAT_MODEL || process.env.ARK_MODEL || 'ep-20260402105011-f9jh7'
 const DEFAULT_ASR_MODEL = process.env.ARK_ASR_MODEL || 'doubao-voice-asr'
 const DEFAULT_TTS_MODEL = process.env.ARK_TTS_MODEL || 'doubao-voice-tts'
 const DEFAULT_TTS_VOICE = process.env.ARK_TTS_VOICE || 'zh_female_meilinvyou_moon_bigtts'
@@ -175,36 +179,49 @@ async function speechToText(input: SpeechToTextInput): Promise<string> {
   const ext = input.fileName?.split('.').pop() || (input.mimeType?.includes('webm') ? 'webm' : 'wav')
   const fileName = input.fileName || `recording.${ext}`
 
-  const form = new FormData()
-  form.append('model', DEFAULT_ASR_MODEL)
-  if (input.language) form.append('language', input.language)
-  form.append('file', new Blob([buffer], { type: input.mimeType || 'audio/webm' }), fileName)
+  const candidateModels = Array.from(new Set([DEFAULT_ASR_MODEL, 'whisper-1']))
+  let lastError = ''
 
-  const response = await fetch(ARK_ASR_URL, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: form,
-  })
+  for (const model of candidateModels) {
+    const form = new FormData()
+    form.append('model', model)
+    if (input.language) form.append('language', input.language)
+    form.append('file', new Blob([buffer], { type: input.mimeType || 'audio/webm' }), fileName)
 
-  if (!response.ok) {
-    const text = await response.text()
-    throw new Error(`ASR 请求失败：${response.status} ${text}`)
+    const response = await fetch(ARK_ASR_URL, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: form,
+    })
+
+    if (!response.ok) {
+      const text = await response.text()
+      lastError = `ASR 请求失败：${response.status} ${text}`
+
+      if (response.status === 404) {
+        continue
+      }
+
+      throw new Error(lastError)
+    }
+
+    const data = (await response.json()) as {
+      text?: string
+      result?: { text?: string }
+      choices?: Array<{ text?: string; message?: { content?: string } }>
+    }
+
+    const text = data.text || data.result?.text || data.choices?.[0]?.text || data.choices?.[0]?.message?.content || ''
+    if (!text.trim()) {
+      throw new Error('ASR 未返回有效文本，请检查模型和音频格式配置。')
+    }
+
+    return text.trim()
   }
 
-  const data = (await response.json()) as {
-    text?: string
-    result?: { text?: string }
-    choices?: Array<{ text?: string; message?: { content?: string } }>
-  }
-
-  const text = data.text || data.result?.text || data.choices?.[0]?.text || data.choices?.[0]?.message?.content || ''
-  if (!text.trim()) {
-    throw new Error('ASR 未返回有效文本，请检查模型和音频格式配置。')
-  }
-
-  return text.trim()
+  throw new Error(`${lastError}\n请检查 ARK_ASR_MODEL / ARK_ASR_ENDPOINT 配置，或在 .env 中指定可用 ASR 模型。`)
 }
 
 async function textToSpeech(text: string): Promise<{ audioBase64: string; mimeType: string }> {
@@ -278,6 +295,46 @@ ipcMain.handle('app:ask-ai', async (_event, message: string) => {
   }
 })
 
+ipcMain.handle('app:ask-ai-with-files', async (_event, message: string, filePaths: string[]) => {
+  try {
+    let fileContents: string[] = []
+    
+    for (const filePath of filePaths) {
+      const ext = filePath.split('.').pop()?.toLowerCase() || ''
+      
+      if (['txt', 'md'].includes(ext)) {
+        const data = await fs.readFile(filePath, 'utf-8')
+        fileContents.push(`\n--- 文件: ${filePath} ---\n${data}`)
+      } else if (ext === 'docx') {
+        const result = await mammoth.convertToHtml({ path: filePath })
+        fileContents.push(`\n--- 文件: ${filePath} ---\n${result.value}`)
+      } else if (['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp'].includes(ext)) {
+        // 对于图片，读取base64并添加到提示中
+        const data = await fs.readFile(filePath)
+        const base64 = data.toString('base64')
+        fileContents.push(`\n--- 图片: ${filePath} ---\n[图片数据: ${ext}格式, base64长度: ${base64.length}]`)
+      } else {
+        return { ok: false, reply: `不支持的文件类型: ${ext}，请使用TXT、MD、DOCX或图片文件` }
+      }
+    }
+    
+    const prompt = `请分析以下文件内容并回答我的问题：
+
+文件内容：
+${fileContents.join('\n')}
+
+我的问题：${message}
+
+请基于所有文件内容进行详细分析和回答。如果有图片，请描述你看到的内容。`
+    
+    const reply = await askDoubao(prompt)
+    return { ok: true, reply }
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : '未知错误'
+    return { ok: false, reply: `请求失败：${msg}` }
+  }
+})
+
 ipcMain.on('app:ask-ai-stream', async (event, message: string) => {
   activeChatController?.abort()
   activeChatController = new AbortController()
@@ -296,7 +353,62 @@ ipcMain.on('app:ask-ai-stream', async (event, message: string) => {
     event.sender.send('app:ai-stream-end')
   } catch (error) {
     const msg = error instanceof Error ? error.message : '未知错误'
-    event.sender.send('app:ai-stream-error', `请求失败：${msg}`)
+    event.sender.send('app:ai-stream-error', `流式请求失败：${msg}`)
+  } finally {
+    activeChatController = null
+  }
+})
+
+ipcMain.on('app:ask-ai-stream-with-files', async (event, message: string, filePaths: string[]) => {
+  activeChatController?.abort()
+  activeChatController = new AbortController()
+
+  try {
+    event.sender.send('app:ai-stream-start')
+    
+    let fileContents: string[] = []
+    
+    for (const filePath of filePaths) {
+      const ext = filePath.split('.').pop()?.toLowerCase() || ''
+      
+      if (['txt', 'md'].includes(ext)) {
+        const data = await fs.readFile(filePath, 'utf-8')
+        fileContents.push(`\n--- 文件: ${filePath} ---\n${data}`)
+      } else if (ext === 'docx') {
+        const result = await mammoth.convertToHtml({ path: filePath })
+        fileContents.push(`\n--- 文件: ${filePath} ---\n${result.value}`)
+      } else if (['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp'].includes(ext)) {
+        // 对于图片，读取base64并添加到提示中
+        const data = await fs.readFile(filePath)
+        const base64 = data.toString('base64')
+        fileContents.push(`\n--- 图片: ${filePath} ---\n[图片数据: ${ext}格式, base64长度: ${base64.length}]`)
+      } else {
+        event.sender.send('app:ai-stream-error', `不支持的文件类型: ${ext}，请使用TXT、MD、DOCX或图片文件`)
+        return
+      }
+    }
+    
+    const prompt = `请分析以下文件内容并回答我的问题：
+
+文件内容：
+${fileContents.join('\n')}
+
+我的问题：${message}
+
+请基于所有文件内容进行详细分析和回答。如果有图片，请描述你看到的内容。`
+
+    await streamDoubaoReply(
+      prompt,
+      (chunk) => {
+        event.sender.send('app:ai-stream-chunk', chunk)
+      },
+      activeChatController.signal
+    )
+
+    event.sender.send('app:ai-stream-end')
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : '未知错误'
+    event.sender.send('app:ai-stream-error', `流式请求失败：${msg}`)
   } finally {
     activeChatController = null
   }

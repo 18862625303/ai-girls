@@ -209,6 +209,31 @@ body {
   align-content: start;
 }
 
+.file-actions {
+  margin-top: 12px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.file-item-wrap {
+  display: grid;
+  grid-template-columns: 24px 1fr 32px;
+  gap: 8px;
+  align-items: center;
+}
+
+.file-check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.file-check input {
+  width: 14px;
+  height: 14px;
+}
+
 .file-item {
   width: 100%;
   border: 1px solid rgba(255, 255, 255, 0.22);
@@ -220,6 +245,21 @@ body {
   justify-content: space-between;
   gap: 12px;
   cursor: pointer;
+}
+
+.file-delete-btn {
+  width: 32px;
+  height: 32px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.85);
+  cursor: pointer;
+}
+
+.file-delete-btn:hover {
+  background: rgba(255, 59, 48, 0.2);
+  color: #ffb5af;
 }
 
 .file-name {
@@ -542,4 +582,190 @@ body {
     right: 24px;
     max-width: none;
   }
+}
+
+/* AI 拖拽区域样式 */
+.ai-drop-zone {
+  margin-top: 16px;
+  padding: 20px;
+  border: 2px dashed rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  text-align: center;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ai-drop-zone:hover {
+  border-color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.ai-drop-zone.dragging {
+  border-color: #5f82ff;
+  background: rgba(95, 130, 255, 0.1);
+  transform: scale(1.02);
+}
+
+.ai-drop-zone.has-file {
+  border-color: rgba(76, 175, 80, 0.6);
+  background: rgba(76, 175, 80, 0.05);
+}
+
+.drop-hint {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.drop-hint span {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.drop-hint small {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.selected-file {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 8px 12px;
+  background: rgba(76, 175, 80, 0.1);
+  border: 1px solid rgba(76, 175, 80, 0.3);
+  border-radius: 8px;
+  color: #4caf50;
+}
+
+.file-info {
+  font-size: 13px;
+  font-weight: 500;
+  flex: 1;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.clear-file-btn {
+  background: none;
+  border: none;
+  color: #4caf50;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px;
+  margin-left: 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.clear-file-btn:hover {
+  background: rgba(76, 175, 80, 0.2);
+}
+
+/* 多文件显示样式 */
+.selected-files {
+  width: 100%;
+}
+
+.files-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.clear-files-btn {
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.clear-files-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.files-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.selected-file-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 6px 10px;
+  background: rgba(76, 175, 80, 0.08);
+  border: 1px solid rgba(76, 175, 80, 0.25);
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 12px;
+}
+
+.selected-file-item:hover {
+  background: rgba(76, 175, 80, 0.12);
+  border-color: rgba(76, 175, 80, 0.4);
+}
+
+.remove-file-btn {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 2px;
+  margin-left: 8px;
+  border-radius: 3px;
+  transition: all 0.2s;
+}
+
+.remove-file-btn:hover {
+  background: rgba(255, 59, 48, 0.2);
+  color: #ff3b30;
+}
+
+/* 文件项拖拽样式 */
+.file-item {
+  cursor: grab;
+  transition: all 0.2s ease;
+}
+
+.file-item:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.file-item:active {
+  cursor: grabbing;
+  transform: translateY(0);
+}
+
+/* 拖拽时的视觉反馈 */
+.file-item[draggable="true"]:hover {
+  border-color: rgba(95, 130, 255, 0.5);
+  background: rgba(95, 130, 255, 0.05);
 }

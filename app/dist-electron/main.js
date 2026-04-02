@@ -1,7 +1,7 @@
 import { ipcMain, dialog, app, BrowserWindow } from "electron";
 import { fileURLToPath } from "node:url";
-import path from "node:path";
-import fs$2 from "node:fs/promises";
+import path$1 from "node:path";
+import fs$3 from "node:fs/promises";
 import require$$0$1 from "stream";
 import require$$2 from "events";
 import require$$0$2 from "buffer";
@@ -2841,22 +2841,22 @@ function requireDebuggability() {
     var disableLongStackTraces = function() {
     };
     Promise2.longStackTraces = function() {
-      if (async2.haveItemsQueued() && !config.longStackTraces) {
+      if (async2.haveItemsQueued() && !config2.longStackTraces) {
         throw new Error("cannot enable long stack traces after promises have been created\n\n    See http://goo.gl/MqrFmX\n");
       }
-      if (!config.longStackTraces && longStackTracesIsSupported()) {
+      if (!config2.longStackTraces && longStackTracesIsSupported()) {
         var Promise_captureStackTrace = Promise2.prototype._captureStackTrace;
         var Promise_attachExtraTrace = Promise2.prototype._attachExtraTrace;
-        config.longStackTraces = true;
+        config2.longStackTraces = true;
         disableLongStackTraces = function() {
-          if (async2.haveItemsQueued() && !config.longStackTraces) {
+          if (async2.haveItemsQueued() && !config2.longStackTraces) {
             throw new Error("cannot enable long stack traces after promises have been created\n\n    See http://goo.gl/MqrFmX\n");
           }
           Promise2.prototype._captureStackTrace = Promise_captureStackTrace;
           Promise2.prototype._attachExtraTrace = Promise_attachExtraTrace;
           Context.deactivateLongStackTraces();
           async2.enableTrampoline();
-          config.longStackTraces = false;
+          config2.longStackTraces = false;
         };
         Promise2.prototype._captureStackTrace = longStackTracesCaptureStackTrace;
         Promise2.prototype._attachExtraTrace = longStackTracesAttachExtraTrace;
@@ -2865,7 +2865,7 @@ function requireDebuggability() {
       }
     };
     Promise2.hasLongStackTraces = function() {
-      return config.longStackTraces && longStackTracesIsSupported();
+      return config2.longStackTraces && longStackTracesIsSupported();
     };
     var fireDomEvent = function() {
       try {
@@ -2981,15 +2981,15 @@ function requireDebuggability() {
       }
       if ("warnings" in opts) {
         var warningsOption = opts.warnings;
-        config.warnings = !!warningsOption;
-        wForgottenReturn = config.warnings;
+        config2.warnings = !!warningsOption;
+        wForgottenReturn = config2.warnings;
         if (util2.isObject(warningsOption)) {
           if ("wForgottenReturn" in warningsOption) {
             wForgottenReturn = !!warningsOption.wForgottenReturn;
           }
         }
       }
-      if ("cancellation" in opts && opts.cancellation && !config.cancellation) {
+      if ("cancellation" in opts && opts.cancellation && !config2.cancellation) {
         if (async2.haveItemsQueued()) {
           throw new Error(
             "cannot enable cancellation after promises are in use"
@@ -3002,14 +3002,14 @@ function requireDebuggability() {
         Promise2.prototype._attachCancellationCallback = cancellationAttachCancellationCallback;
         Promise2.prototype._execute = cancellationExecute;
         propagateFromFunction = cancellationPropagateFrom;
-        config.cancellation = true;
+        config2.cancellation = true;
       }
       if ("monitoring" in opts) {
-        if (opts.monitoring && !config.monitoring) {
-          config.monitoring = true;
+        if (opts.monitoring && !config2.monitoring) {
+          config2.monitoring = true;
           Promise2.prototype._fireEvent = activeFireEvent;
-        } else if (!opts.monitoring && config.monitoring) {
-          config.monitoring = false;
+        } else if (!opts.monitoring && config2.monitoring) {
+          config2.monitoring = false;
           Promise2.prototype._fireEvent = defaultFireEvent;
         }
       }
@@ -3172,12 +3172,12 @@ function requireDebuggability() {
       return warn(message);
     }
     function warn(message, shouldUseOwnTrace, promise2) {
-      if (!config.warnings) return;
+      if (!config2.warnings) return;
       var warning2 = new Warning(message);
       var ctx;
       if (shouldUseOwnTrace) {
         promise2._attachExtraTrace(warning2);
-      } else if (config.longStackTraces && (ctx = Promise2._peekContext())) {
+      } else if (config2.longStackTraces && (ctx = Promise2._peekContext())) {
         ctx.attachExtraTrace(warning2);
       } else {
         var parsed = parseStackAndMessage(warning2);
@@ -3533,7 +3533,7 @@ function requireDebuggability() {
         };
       }
     }
-    var config = {
+    var config2 = {
       warnings,
       longStackTraces: false,
       cancellation: false,
@@ -3542,16 +3542,16 @@ function requireDebuggability() {
     if (longStackTraces) Promise2.longStackTraces();
     return {
       longStackTraces: function() {
-        return config.longStackTraces;
+        return config2.longStackTraces;
       },
       warnings: function() {
-        return config.warnings;
+        return config2.warnings;
       },
       cancellation: function() {
-        return config.cancellation;
+        return config2.cancellation;
       },
       monitoring: function() {
-        return config.monitoring;
+        return config2.monitoring;
       },
       propagateFromFunction: function() {
         return propagateFromFunction;
@@ -20314,7 +20314,7 @@ XMLReader$1.prototype = {
     var domBuilder = this.domBuilder;
     domBuilder.startDocument();
     _copy(defaultNSMap, defaultNSMap = {});
-    parse(
+    parse$1(
       source,
       defaultNSMap,
       entityMap,
@@ -20324,7 +20324,7 @@ XMLReader$1.prototype = {
     domBuilder.endDocument();
   }
 };
-function parse(source, defaultNSMapCopy, entityMap, domBuilder, errorHandler) {
+function parse$1(source, defaultNSMapCopy, entityMap, domBuilder, errorHandler) {
   function fixedFromCharCode(code2) {
     if (code2 > 65535) {
       code2 -= 65536;
@@ -20387,21 +20387,21 @@ function parse(source, defaultNSMapCopy, entityMap, domBuilder, errorHandler) {
         case "/":
           var end = source.indexOf(">", tagStart + 3);
           var tagName = source.substring(tagStart + 2, end).replace(/[ \t\n\r]+$/g, "");
-          var config = parseStack.pop();
+          var config2 = parseStack.pop();
           if (end < 0) {
             tagName = source.substring(tagStart + 2).replace(/[\s<].*/, "");
-            errorHandler.error("end tag name: " + tagName + " is not complete:" + config.tagName);
+            errorHandler.error("end tag name: " + tagName + " is not complete:" + config2.tagName);
             end = tagStart + 1 + tagName.length;
           } else if (tagName.match(/\s</)) {
             tagName = tagName.replace(/[\s<].*/, "");
             errorHandler.error("end tag name: " + tagName + " maybe not complete");
             end = tagStart + 1 + tagName.length;
           }
-          var localNSMap = config.localNSMap;
-          var endMatch = config.tagName == tagName;
-          var endIgnoreCaseMach = endMatch || config.tagName && config.tagName.toLowerCase() == tagName.toLowerCase();
+          var localNSMap = config2.localNSMap;
+          var endMatch = config2.tagName == tagName;
+          var endIgnoreCaseMach = endMatch || config2.tagName && config2.tagName.toLowerCase() == tagName.toLowerCase();
           if (endIgnoreCaseMach) {
-            domBuilder.endElement(config.uri, config.localName, tagName);
+            domBuilder.endElement(config2.uri, config2.localName, tagName);
             if (localNSMap) {
               for (var prefix in localNSMap) {
                 if (Object.prototype.hasOwnProperty.call(localNSMap, prefix)) {
@@ -20410,10 +20410,10 @@ function parse(source, defaultNSMapCopy, entityMap, domBuilder, errorHandler) {
               }
             }
             if (!endMatch) {
-              errorHandler.fatalError("end tag name: " + tagName + " is not match the current start tagName:" + config.tagName);
+              errorHandler.fatalError("end tag name: " + tagName + " is not match the current start tagName:" + config2.tagName);
             }
           } else {
-            parseStack.push(config);
+            parseStack.push(config2);
           }
           end++;
           break;
@@ -25933,7 +25933,7 @@ pathIsAbsolute.exports = process.platform === "win32" ? win32 : posix;
 pathIsAbsolute.exports.posix = posix;
 pathIsAbsolute.exports.win32 = win32;
 var pathIsAbsoluteExports = pathIsAbsolute.exports;
-var fs$1 = require$$0$3;
+var fs$2 = require$$0$3;
 var url = require$$1$1;
 var os = require$$2$1;
 var dirname = require$$3.dirname;
@@ -25974,7 +25974,7 @@ function Files$1(options) {
     read: read2
   };
 }
-var readFile$1 = promises$4.promisify(fs$1.readFile.bind(fs$1));
+var readFile$1 = promises$4.promisify(fs$2.readFile.bind(fs$2));
 function uriToPath(uriString, platform) {
   if (!platform) {
     platform = os.platform();
@@ -28572,11 +28572,11 @@ function identity(value) {
   return value;
 }
 var unzip$1 = {};
-var fs = require$$0$3;
+var fs$1 = require$$0$3;
 var promises = promises$7;
 var zipfile = zipfile$2;
 unzip$1.openZip = openZip;
-var readFile = promises.promisify(fs.readFile);
+var readFile = promises.promisify(fs$1.readFile);
 function openZip(options) {
   if (options.path) {
     return readFile(options.path).then(zipfile.openArrayBuffer);
@@ -28683,14 +28683,80 @@ function embedStyleMap(input, styleMap2) {
 lib$5.styleMapping = function() {
   throw new Error(`Use a raw string instead of mammoth.styleMapping e.g. "p[style-name='Title'] => h1" instead of mammoth.styleMapping("p[style-name='Title'] => h1")`);
 };
-const __dirname$1 = path.dirname(fileURLToPath(import.meta.url));
-process.env.APP_ROOT = path.join(__dirname$1, "..");
+const fs = require$$0$3;
+const path = require$$3;
+function log(message) {
+  console.log(`[dotenv][DEBUG] ${message}`);
+}
+const NEWLINE = "\n";
+const RE_INI_KEY_VAL = /^\s*([\w.-]+)\s*=\s*(.*)?\s*$/;
+const RE_NEWLINES = /\\n/g;
+const NEWLINES_MATCH = /\r\n|\n|\r/;
+function parse(src, options) {
+  const debug = Boolean(options && options.debug);
+  const obj = {};
+  src.toString().split(NEWLINES_MATCH).forEach(function(line, idx) {
+    const keyValueArr = line.match(RE_INI_KEY_VAL);
+    if (keyValueArr != null) {
+      const key = keyValueArr[1];
+      let val = keyValueArr[2] || "";
+      const end = val.length - 1;
+      const isDoubleQuoted = val[0] === '"' && val[end] === '"';
+      const isSingleQuoted = val[0] === "'" && val[end] === "'";
+      if (isSingleQuoted || isDoubleQuoted) {
+        val = val.substring(1, end);
+        if (isDoubleQuoted) {
+          val = val.replace(RE_NEWLINES, NEWLINE);
+        }
+      } else {
+        val = val.trim();
+      }
+      obj[key] = val;
+    } else if (debug) {
+      log(`did not match key and value when parsing line ${idx + 1}: ${line}`);
+    }
+  });
+  return obj;
+}
+function config(options) {
+  let dotenvPath = path.resolve(process.cwd(), ".env");
+  let encoding = "utf8";
+  let debug = false;
+  if (options) {
+    if (options.path != null) {
+      dotenvPath = options.path;
+    }
+    if (options.encoding != null) {
+      encoding = options.encoding;
+    }
+    if (options.debug != null) {
+      debug = true;
+    }
+  }
+  try {
+    const parsed = parse(fs.readFileSync(dotenvPath, { encoding }), { debug });
+    Object.keys(parsed).forEach(function(key) {
+      if (!Object.prototype.hasOwnProperty.call(process.env, key)) {
+        process.env[key] = parsed[key];
+      } else if (debug) {
+        log(`"${key}" is already defined in \`process.env\` and will not be overwritten`);
+      }
+    });
+    return { parsed };
+  } catch (e) {
+    return { error: e };
+  }
+}
+var config_1 = config;
+const __dirname$1 = path$1.dirname(fileURLToPath(import.meta.url));
+config_1({ path: path$1.join(__dirname$1, "..", ".env") });
+process.env.APP_ROOT = path$1.join(__dirname$1, "..");
 const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
-const RENDERER_DIST = path.join(process.env.APP_ROOT, "dist");
-process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL ? path.join(process.env.APP_ROOT, "public") : RENDERER_DIST;
+const RENDERER_DIST = path$1.join(process.env.APP_ROOT, "dist");
+process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL ? path$1.join(process.env.APP_ROOT, "public") : RENDERER_DIST;
 let win;
 let activeChatController = null;
-const DEFAULT_CHAT_MODEL = process.env.ARK_CHAT_MODEL || process.env.ARK_MODEL || "doubao-1-5-lite-32k-250115";
+const DEFAULT_CHAT_MODEL = process.env.ARK_CHAT_MODEL || process.env.ARK_MODEL || "ep-20260402105011-f9jh7";
 const DEFAULT_ASR_MODEL = process.env.ARK_ASR_MODEL || "doubao-voice-asr";
 const DEFAULT_TTS_MODEL = process.env.ARK_TTS_MODEL || "doubao-voice-tts";
 const DEFAULT_TTS_VOICE = process.env.ARK_TTS_VOICE || "zh_female_meilinvyou_moon_bigtts";
@@ -28699,9 +28765,9 @@ const ARK_ASR_URL = process.env.ARK_ASR_ENDPOINT || "https://ark.cn-beijing.volc
 const ARK_TTS_URL = process.env.ARK_TTS_ENDPOINT || "https://ark.cn-beijing.volces.com/api/v3/audio/speech";
 function createWindow() {
   win = new BrowserWindow({
-    icon: path.join(process.env.VITE_PUBLIC, "electron-vite.svg"),
+    icon: path$1.join(process.env.VITE_PUBLIC, "electron-vite.svg"),
     webPreferences: {
-      preload: path.join(__dirname$1, "preload.mjs")
+      preload: path$1.join(__dirname$1, "preload.mjs")
     }
   });
   win.webContents.on("did-finish-load", () => {
@@ -28710,7 +28776,7 @@ function createWindow() {
   if (VITE_DEV_SERVER_URL) {
     win.loadURL(VITE_DEV_SERVER_URL);
   } else {
-    win.loadFile(path.join(RENDERER_DIST, "index.html"));
+    win.loadFile(path$1.join(RENDERER_DIST, "index.html"));
   }
 }
 function requireArkApiKey() {
@@ -28815,27 +28881,37 @@ async function speechToText(input) {
   const buffer = Buffer.from(input.audioBase64, "base64");
   const ext = ((_a = input.fileName) == null ? void 0 : _a.split(".").pop()) || (((_b = input.mimeType) == null ? void 0 : _b.includes("webm")) ? "webm" : "wav");
   const fileName = input.fileName || `recording.${ext}`;
-  const form = new FormData();
-  form.append("model", DEFAULT_ASR_MODEL);
-  if (input.language) form.append("language", input.language);
-  form.append("file", new Blob([buffer], { type: input.mimeType || "audio/webm" }), fileName);
-  const response = await fetch(ARK_ASR_URL, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`
-    },
-    body: form
-  });
-  if (!response.ok) {
-    const text2 = await response.text();
-    throw new Error(`ASR 请求失败：${response.status} ${text2}`);
+  const candidateModels = Array.from(/* @__PURE__ */ new Set([DEFAULT_ASR_MODEL, "whisper-1"]));
+  let lastError = "";
+  for (const model of candidateModels) {
+    const form = new FormData();
+    form.append("model", model);
+    if (input.language) form.append("language", input.language);
+    form.append("file", new Blob([buffer], { type: input.mimeType || "audio/webm" }), fileName);
+    const response = await fetch(ARK_ASR_URL, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`
+      },
+      body: form
+    });
+    if (!response.ok) {
+      const text2 = await response.text();
+      lastError = `ASR 请求失败：${response.status} ${text2}`;
+      if (response.status === 404) {
+        continue;
+      }
+      throw new Error(lastError);
+    }
+    const data = await response.json();
+    const text = data.text || ((_c = data.result) == null ? void 0 : _c.text) || ((_e = (_d = data.choices) == null ? void 0 : _d[0]) == null ? void 0 : _e.text) || ((_h = (_g = (_f = data.choices) == null ? void 0 : _f[0]) == null ? void 0 : _g.message) == null ? void 0 : _h.content) || "";
+    if (!text.trim()) {
+      throw new Error("ASR 未返回有效文本，请检查模型和音频格式配置。");
+    }
+    return text.trim();
   }
-  const data = await response.json();
-  const text = data.text || ((_c = data.result) == null ? void 0 : _c.text) || ((_e = (_d = data.choices) == null ? void 0 : _d[0]) == null ? void 0 : _e.text) || ((_h = (_g = (_f = data.choices) == null ? void 0 : _f[0]) == null ? void 0 : _g.message) == null ? void 0 : _h.content) || "";
-  if (!text.trim()) {
-    throw new Error("ASR 未返回有效文本，请检查模型和音频格式配置。");
-  }
-  return text.trim();
+  throw new Error(`${lastError}
+请检查 ARK_ASR_MODEL / ARK_ASR_ENDPOINT 配置，或在 .env 中指定可用 ASR 模型。`);
 }
 async function textToSpeech(text) {
   const apiKey = requireArkApiKey();
@@ -28882,7 +28958,7 @@ ipcMain.handle("app:open-files", async () => {
   return result2.canceled ? [] : result2.filePaths;
 });
 ipcMain.handle("app:read-file", async (_event, filePath) => {
-  const data = await fs$2.readFile(filePath);
+  const data = await fs$3.readFile(filePath);
   return data.toString("base64");
 });
 ipcMain.handle("app:read-docx-html", async (_event, filePath) => {
@@ -28892,6 +28968,47 @@ ipcMain.handle("app:read-docx-html", async (_event, filePath) => {
 ipcMain.handle("app:ask-ai", async (_event, message) => {
   try {
     const reply = await askDoubao(message);
+    return { ok: true, reply };
+  } catch (error2) {
+    const msg2 = error2 instanceof Error ? error2.message : "未知错误";
+    return { ok: false, reply: `请求失败：${msg2}` };
+  }
+});
+ipcMain.handle("app:ask-ai-with-files", async (_event, message, filePaths) => {
+  var _a;
+  try {
+    let fileContents = [];
+    for (const filePath of filePaths) {
+      const ext = ((_a = filePath.split(".").pop()) == null ? void 0 : _a.toLowerCase()) || "";
+      if (["txt", "md"].includes(ext)) {
+        const data = await fs$3.readFile(filePath, "utf-8");
+        fileContents.push(`
+--- 文件: ${filePath} ---
+${data}`);
+      } else if (ext === "docx") {
+        const result2 = await lib$5.convertToHtml({ path: filePath });
+        fileContents.push(`
+--- 文件: ${filePath} ---
+${result2.value}`);
+      } else if (["png", "jpg", "jpeg", "gif", "webp", "bmp"].includes(ext)) {
+        const data = await fs$3.readFile(filePath);
+        const base642 = data.toString("base64");
+        fileContents.push(`
+--- 图片: ${filePath} ---
+[图片数据: ${ext}格式, base64长度: ${base642.length}]`);
+      } else {
+        return { ok: false, reply: `不支持的文件类型: ${ext}，请使用TXT、MD、DOCX或图片文件` };
+      }
+    }
+    const prompt = `请分析以下文件内容并回答我的问题：
+
+文件内容：
+${fileContents.join("\n")}
+
+我的问题：${message}
+
+请基于所有文件内容进行详细分析和回答。如果有图片，请描述你看到的内容。`;
+    const reply = await askDoubao(prompt);
     return { ok: true, reply };
   } catch (error2) {
     const msg2 = error2 instanceof Error ? error2.message : "未知错误";
@@ -28913,7 +29030,60 @@ ipcMain.on("app:ask-ai-stream", async (event, message) => {
     event.sender.send("app:ai-stream-end");
   } catch (error2) {
     const msg2 = error2 instanceof Error ? error2.message : "未知错误";
-    event.sender.send("app:ai-stream-error", `请求失败：${msg2}`);
+    event.sender.send("app:ai-stream-error", `流式请求失败：${msg2}`);
+  } finally {
+    activeChatController = null;
+  }
+});
+ipcMain.on("app:ask-ai-stream-with-files", async (event, message, filePaths) => {
+  var _a;
+  activeChatController == null ? void 0 : activeChatController.abort();
+  activeChatController = new AbortController();
+  try {
+    event.sender.send("app:ai-stream-start");
+    let fileContents = [];
+    for (const filePath of filePaths) {
+      const ext = ((_a = filePath.split(".").pop()) == null ? void 0 : _a.toLowerCase()) || "";
+      if (["txt", "md"].includes(ext)) {
+        const data = await fs$3.readFile(filePath, "utf-8");
+        fileContents.push(`
+--- 文件: ${filePath} ---
+${data}`);
+      } else if (ext === "docx") {
+        const result2 = await lib$5.convertToHtml({ path: filePath });
+        fileContents.push(`
+--- 文件: ${filePath} ---
+${result2.value}`);
+      } else if (["png", "jpg", "jpeg", "gif", "webp", "bmp"].includes(ext)) {
+        const data = await fs$3.readFile(filePath);
+        const base642 = data.toString("base64");
+        fileContents.push(`
+--- 图片: ${filePath} ---
+[图片数据: ${ext}格式, base64长度: ${base642.length}]`);
+      } else {
+        event.sender.send("app:ai-stream-error", `不支持的文件类型: ${ext}，请使用TXT、MD、DOCX或图片文件`);
+        return;
+      }
+    }
+    const prompt = `请分析以下文件内容并回答我的问题：
+
+文件内容：
+${fileContents.join("\n")}
+
+我的问题：${message}
+
+请基于所有文件内容进行详细分析和回答。如果有图片，请描述你看到的内容。`;
+    await streamDoubaoReply(
+      prompt,
+      (chunk2) => {
+        event.sender.send("app:ai-stream-chunk", chunk2);
+      },
+      activeChatController.signal
+    );
+    event.sender.send("app:ai-stream-end");
+  } catch (error2) {
+    const msg2 = error2 instanceof Error ? error2.message : "未知错误";
+    event.sender.send("app:ai-stream-error", `流式请求失败：${msg2}`);
   } finally {
     activeChatController = null;
   }
